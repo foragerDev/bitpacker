@@ -34,7 +34,12 @@ TEST(TestSerialization, TestGetArgument) {
 
 TEST(TestSerialization, TestSignedIntegerSerialization) {
     std::vector<std::byte> bytes = serialize(10);
-
     EXPECT_EQ(get_major_type(bytes[0]), MajorType::SIGNED_INTEGER);
-    EXPECT_EQ(get_argument(bytes[0]), std::byte {0x20});
+    EXPECT_EQ(get_argument(bytes[0]), std::byte {0xA});
+}
+
+TEST(TestSerialization, TestSignedInteger2Bytes) {
+    auto bytes = serialize(25);
+    EXPECT_EQ(get_major_type(bytes[0]), MajorType::SIGNED_INTEGER);
+    EXPECT_EQ(get_argument(bytes[0]), std::byte{24});
 }
