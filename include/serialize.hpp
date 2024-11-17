@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <utility>
 #include <concepts>
+#include <type_traits>
 
 namespace bitpacker {
     // template <typename T>
@@ -17,6 +18,13 @@ namespace bitpacker {
         FLOATING_POINT = 7 << 5
     };
 
+    template <typename T>
+    concept isPositive = requires(T t) {
+        t >= 0;
+    };
+
+    template <typename T>
+    concept isNegative = !isPositive<T>;
 
     // Return MajorType from the byte
     MajorType get_major_type(std::byte data) {
@@ -29,7 +37,7 @@ namespace bitpacker {
         std::byte mask{ 0x1F };
         return data & mask;
     }
-            // This will convert to bytes in lower endian on Windows 11
+    // This will convert to bytes in lower endian on Windows 11
     void save_bytes(std::vector<std::byte>& destination, std::byte* source, size_t bytes) {
         for (int i = 0; i < bytes; i++) {
             destination.push_back(*(source + i));
@@ -40,47 +48,51 @@ namespace bitpacker {
         return std::byte{ std::to_underlying(type) } | argument;
     }
 
+    void add_first_value(std::byte& data, std::byte value) {
+        data |= value;
+    }
 
-    inline std::vector<std::byte> serialize_numeric(MajorType data_type, std::integral  auto integer) {
+
+    inline std::vector<std::byte> serialize_numeric(MajorType data_type, std::integral auto integer) {
         std::vector<std::byte> byte_data;
-        const int d = integer;
+        auto d = abs(integer);
         // std::byte data{d};
-        if (integer < 24) {
-            std::byte first_byte = add_argument(data_type, std::byte{ 10 });
+        if (d < 24) {
+            std::byte first_byte = add_argument(data_type, std::byte{ d });
             byte_data.push_back(first_byte);
         }
-        else if (integer <= 0xFF) {
+        else if (d <= 0xFF) {
             std::byte first_byte = add_argument(data_type, std::byte{ 24 });
             byte_data.push_back(first_byte);
-            save_bytes(byte_data, reinterpret_cast<std::byte*>(&integer), 1);
+            save_bytes(byte_data, reinterpret_cast<std::byte*>(&d), 1);
         }
-        else if (integer <= 0xFFFF) {
+        else if (d <= 0xFFFF) {
             std::byte first_byte = add_argument(data_type, std::byte{ 25 });
             byte_data.push_back(first_byte);
-            save_bytes(byte_data, reinterpret_cast<std::byte*>(&integer), 2);
+            save_bytes(byte_data, reinterpret_cast<std::byte*>(&d), 2);
         }
-        else if (integer <= 0xFFFFFFFF) {
+        else if (d <= 0xFFFFFFFF) {
             std::byte first_byte = add_argument(data_type, std::byte{ 26 });
             byte_data.push_back(first_byte);
-            save_bytes(byte_data, reinterpret_cast<std::byte*>(&integer), 4);
+            save_bytes(byte_data, reinterpret_cast<std::byte*>(&d), 4);
         }
-        else if (integer <= 0xFFFFFFFFFFFFFFFF) {
+        else if (d <= 0xFFFFFFFFFFFFFFFF) {
             std::byte first_byte = add_argument(data_type, std::byte{ 27 });
             byte_data.push_back(first_byte);
-            save_bytes(byte_data, reinterpret_cast<std::byte*>(&integer), 8);
+            save_bytes(byte_data, reinterpret_cast<std::byte*>(&d), 8);
         }
-
+        std::reverse(byte_data.begin() + 1, byte_data.end());
         return byte_data;
     }
 
     // Serializations function specializations
-    inline std::vector<std::byte> serialize(std::signed_integral auto integer) {
-        return serialize_numeric(MajorType::SIGNED_INTEGER, abs(integer));
+    // The value of the signed integer is argument - 1, hence our number is < 0 so 
+    // Reference: https://datatracker.ietf.org/doc/html/rfc8949#section-3.1-2.4
+    inline std::vector<std::byte> serialize(std::integral auto integer) {
+        return integer < 0 ? serialize_numeric(MajorType::SIGNED_INTEGER, integer + 1)
+            : serialize_numeric(MajorType::UNSIGNED_INTEGER, integer);
     }
 
-    inline std::vector<std::byte> serialize(std::unsigned_integral auto integer) {
-        return serialize_numeric(MajorType::UNSIGNED_INTEGER, integer);
-    }
 
 
 } // namespace bitpacker
