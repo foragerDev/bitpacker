@@ -1,9 +1,10 @@
 #include <gtest/gtest.h>
 #include "serialize.hpp"
-
+#include <print>
 using namespace bitpacker;
 
-TEST(TestSerialization, TestMajorType) {
+TEST(TestSerialization, TestMajorType)
+{
     EXPECT_EQ((uint8_t)0 << 5, std::to_underlying(MajorType::UNSIGNED_INTEGER));
     EXPECT_EQ((uint8_t)1 << 5, std::to_underlying(MajorType::SIGNED_INTEGER));
     EXPECT_EQ((uint8_t)2 << 5, std::to_underlying(MajorType::BYTE_STRING));
@@ -14,81 +15,108 @@ TEST(TestSerialization, TestMajorType) {
     EXPECT_EQ((uint8_t)7 << 5, std::to_underlying(MajorType::FLOATING_POINT));
 }
 
-TEST(TestSerialization, TestAddArgument) {
-    EXPECT_EQ(add_argument(MajorType::UNSIGNED_INTEGER, std::byte{ 2 }), std::byte{ 2 });
-    EXPECT_EQ(add_argument(MajorType::SIGNED_INTEGER, std::byte{ 16 }), std::byte{ 48 });
-    EXPECT_EQ(add_argument(MajorType::FLOATING_POINT, std::byte{ 16 }), std::byte{ 224 + 16 });
+TEST(TestSerialization, TestAddArgument)
+{
+    EXPECT_EQ(add_argument(MajorType::UNSIGNED_INTEGER, std::byte{2}), std::byte{2});
+    EXPECT_EQ(add_argument(MajorType::SIGNED_INTEGER, std::byte{16}), std::byte{48});
+    EXPECT_EQ(add_argument(MajorType::FLOATING_POINT, std::byte{16}), std::byte{224 + 16});
 }
 
-TEST(TestSerialization, TestGetMajorType) {
-    EXPECT_EQ(get_major_type(std::byte{ 0b11101010 }), MajorType::FLOATING_POINT);
-    EXPECT_EQ(get_major_type(std::byte{ 0b00010101 }), MajorType::UNSIGNED_INTEGER);
-    EXPECT_EQ(get_major_type(std::byte{ 0b01010111 }), MajorType::BYTE_STRING);
+TEST(TestSerialization, TestGetMajorType)
+{
+    EXPECT_EQ(get_major_type(std::byte{0b11101010}), MajorType::FLOATING_POINT);
+    EXPECT_EQ(get_major_type(std::byte{0b00010101}), MajorType::UNSIGNED_INTEGER);
+    EXPECT_EQ(get_major_type(std::byte{0b01010111}), MajorType::BYTE_STRING);
 }
 
-TEST(TestSerialization, TestGetArgument) {
-    EXPECT_EQ(get_argument(std::byte{ 0b11101010 }), std::byte{ 0xA });
-    EXPECT_EQ(get_argument(std::byte{ 0b01011111 }), std::byte{ 0x1F });
+TEST(TestSerialization, TestGetArgument)
+{
+    EXPECT_EQ(get_argument(std::byte{0b11101010}), std::byte{0xA});
+    EXPECT_EQ(get_argument(std::byte{0b01011111}), std::byte{0x1F});
 }
 
-TEST(TestSerialization, TestSignedIntegerSerialization) {
+TEST(TestSerialization, TestSignedIntegerSerialization)
+{
     std::vector<std::byte> bytes = serialize(-10);
-    EXPECT_EQ(get_argument(bytes[0]), std::byte{ 0x09 });
+    EXPECT_EQ(get_argument(bytes[0]), std::byte{0x09});
 
     bytes = serialize(-23);
-    EXPECT_EQ(get_argument(bytes[0]), std::byte{ 0x16 });
+    EXPECT_EQ(get_argument(bytes[0]), std::byte{0x16});
 }
 
-void compare_bytes(std::vector<int>& expected, std::vector<std::byte>& bytes) {
-    for (int i = 0; i < expected.size(); i++) {
+void compare_bytes(const std::vector<int> &expected, std::vector<std::byte> &bytes)
+{
+    for (int i = 0; i < expected.size(); i++)
+    {
         EXPECT_EQ(std::to_integer<int>(bytes[i]), expected[i]);
     }
 }
 
-TEST(TestSerialization, TestSignedInteger1Bytes) {
+TEST(TestSerialization, TestSignedInteger1Bytes)
+{
     auto bytes = serialize(-55);
-    std::vector<int> expected{ 0x38, 0x36 };
+    const std::vector<int> expected{0x38, 0x36};
     compare_bytes(expected, bytes);
 }
 
-TEST(TestSerialization, TestSignedNegative2Bytes) {
+TEST(TestSerialization, TestSignedNegative2Bytes)
+{
     auto bytes = serialize(-344);
-    std::vector<int> expected{ 0x39, 0x01, 0x57 };
+    const std::vector<int> expected{0x39, 0x01, 0x57};
     compare_bytes(expected, bytes);
 }
 
-TEST(TestSerialization, TestSignedNegative4Bytes) {
+TEST(TestSerialization, TestSignedNegative4Bytes)
+{
     auto bytes = serialize(-655100);
-    std::vector<int> expected{ 0x3A, 0x00, 0x09, 0xFE, 0xFB };
+    const std::vector<int> expected{0x3A, 0x00, 0x09, 0xFE, 0xFB};
     compare_bytes(expected, bytes);
 }
 
-TEST(TestSerialization, TestSignedNegative8Bytes) {
+TEST(TestSerialization, TestSignedNegative8Bytes)
+{
     auto bytes = serialize(-23428794977400);
-    std::vector<int> expected{ 0x3B, 0x00, 0x00, 0x15, 0x4E, 0xF1, 0x00, 0x8C, 0x77 };
+    const std::vector<int> expected{0x3B, 0x00, 0x00, 0x15, 0x4E, 0xF1, 0x00, 0x8C, 0x77};
     compare_bytes(expected, bytes);
-
 }
 
-TEST(TestSerialization, TestUnsigned1Byte) {
+TEST(TestSerialization, TestUnsigned1Byte)
+{
     auto bytes = serialize(10);
-    EXPECT_EQ(get_argument(bytes[0]), std::byte{ 0x0A });
+    EXPECT_EQ(get_argument(bytes[0]), std::byte{0x0A});
 }
 
-TEST(TestSerialization, TestUnsigned2Byte) {
+TEST(TestSerialization, TestUnsigned2Byte)
+{
     auto bytes = serialize(27);
-    std::vector<int> expected{ 0x18, 0x1B };
+    const std::vector<int> expected{0x18, 0x1B};
     compare_bytes(expected, bytes);
 }
 
-TEST(TestSerialization, TestUnsigned4Byte) {
+TEST(TestSerialization, TestUnsigned4Byte)
+{
     auto bytes = serialize(655100);
-    std::vector<int> expected{ 0x1A, 0x00, 0x09, 0xFE, 0xFC };
+    const std::vector<int> expected{0x1A, 0x00, 0x09, 0xFE, 0xFC};
     compare_bytes(expected, bytes);
 }
 
-TEST(TestSerialization, TestUnsigned8Byte) {
+TEST(TestSerialization, TestUnsigned8Byte)
+{
     auto bytes = serialize(23428794977400);
-    std::vector<int> expected{ 0x1B, 0x00, 0x00, 0x15, 0x4E, 0xF1, 0x00, 0x8C, 0x78 };
+    const std::vector<int> expected{0x1B, 0x00, 0x00, 0x15, 0x4E, 0xF1, 0x00, 0x8C, 0x78};
     compare_bytes(expected, bytes);
+}
+
+TEST(TestSerialization, TestByteString1Byte)
+{
+    auto bytes = serialize_raw("ABCD");
+    const std::vector<int> expected{0x44, 0x41, 0x42, 0x43, 0x44};
+    compare_bytes(expected, bytes);
+}
+
+TEST(TestSerialization, TestByteString2Byte)
+{
+    auto bytes = serialize_raw("ABCDABCDABCDABCDABCDABCDABCDABCDABCDABCDABCDABCDABCDABCDABCDABCD");
+    std::print("{:#x}", std::to_integer<int>(bytes[1]));
+    EXPECT_EQ(bytes[0], std::byte(88));
 }
