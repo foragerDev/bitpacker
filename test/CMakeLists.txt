@@ -1,15 +1,18 @@
 include_directories(${libbitpacker_SOURCE_DIR}/include)
 
+set(sourcepath ${libbitpacker_SOURCE_DIR}/src)
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-enable_testing()
-
-add_executable(tests
-    test_serializer.cpp
+set(sources
+  ${sourcepath}/encode.cpp
+  ${sourcepath}/serialize.cpp
+  ${sourcepath}/cbor_variant.cpp
+  test_serializer.cpp
 )
 
+message(echo ${sources})
+
+
+add_executable(tests ${sources})
 target_link_libraries(
   tests
   GTest::gtest_main

@@ -1,18 +1,20 @@
-cmake_minimum_required(VERSION 3.22.1)
+cmake_minimum_required(VERSION 3.31.5)
 project(libbitpacker LANGUAGES CXX)
 
-add_subdirectory(src)
-add_subdirectory(test)
-include_directories(include)
-
+# Set the C++ standard early
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-add_compile_options(-std=c++23)
+# Include directories
+include_directories(include)
 
-# add_executable(TARGET  src/bitpacker.cpp)
+# Add subdirectories after setting the C++ standard
+add_subdirectory(src)
+add_subdirectory(test)
+
+# Fetch Google Test
 include(FetchContent)
 FetchContent_Declare(
   googletest
