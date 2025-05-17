@@ -22,17 +22,17 @@ namespace bitpacker
     {
         std::vector<std::byte> byte_data;
         auto size = data.size();
-        auto first_byte = add_argument(MajorType::MAP, std::byte(size));
+        auto first_byte = add_argument(MajorType::MAP, static_cast<std::byte>(size));
 
-        for (auto &item : data)
+        for (auto &[fst, snd] : data)
         {
-            auto key = serialize(item.first);
-            auto value = item.second.serialize();
+            auto key = serialize(fst);
+            auto value = snd .serialize();
             byte_data.insert(byte_data.end(), key.begin(), key.end());
             byte_data.insert(byte_data.end(), value.begin(), value.end());
         }
 
-        auto data_ptr = reinterpret_cast<const std::byte *>(byte_data.data());
+        const auto data_ptr = reinterpret_cast<const std::byte *>(byte_data.data());
         return to_bytes(first_byte, data_ptr, byte_data.size(), true);
     }
 }

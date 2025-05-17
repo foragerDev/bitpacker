@@ -53,7 +53,7 @@ namespace bitpacker
 
         auto first_byte = add_argument(data_type, get_argument_value(d));
 
-        const std::byte *data_ptr = reinterpret_cast<const std::byte *>(&d);
+        const auto *data_ptr = reinterpret_cast<const std::byte *>(&d);
 
         return to_bytes(first_byte, data_ptr, input_size(d));
     }
@@ -69,6 +69,8 @@ namespace bitpacker
     return_type serialize(std::string_view str);
     return_type serialize(std::vector<cvariant> &arr);
     return_type serialize(std::unordered_map<std::string, cvariant> &ht);
+    return_type serialize(float singleP_float);
+    return_type serialize(double doubleP_float);
 
 } // namespace bitpacker
 #endif

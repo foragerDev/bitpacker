@@ -1,20 +1,9 @@
 #include <gtest/gtest.h>
 #include "serialize.hpp"
 #include "cbor_variant.hpp"
-
+#include "deserialize.hpp"
+// #include <print>
 using namespace bitpacker;
-
-TEST(TestSerialization, TestMajorType)
-{
-    EXPECT_EQ((uint8_t)0 << 5, std::to_underlying(MajorType::UNSIGNED_INTEGER));
-    EXPECT_EQ((uint8_t)1 << 5, std::to_underlying(MajorType::SIGNED_INTEGER));
-    EXPECT_EQ((uint8_t)2 << 5, std::to_underlying(MajorType::BYTE_STRING));
-    EXPECT_EQ((uint8_t)3 << 5, std::to_underlying(MajorType::TEXT_STRING));
-    EXPECT_EQ((uint8_t)4 << 5, std::to_underlying(MajorType::ARRAY));
-    EXPECT_EQ((uint8_t)5 << 5, std::to_underlying(MajorType::MAP));
-    // EXPECT_EQ((uint8_t)6 << 5, std::to_underlying(MajorType::TAGGED_DATA));
-    // EXPECT_EQ((uint8_t)7 << 5, std::to_underlying(MajorType::FLOATING_POINT));
-}
 
 TEST(TestSerialization, TestAddArgument)
 {
@@ -110,19 +99,12 @@ TEST(TestSerialization, TestUnsigned8Byte)
     compare_bytes(expected, bytes);
 }
 
-// TEST(TestSerialization, TestByteString1Byte)
-// {
-//     auto bytes = serialize_raw("ABCD");
-//     const std::vector<int> expected{0x44, 0x41, 0x42, 0x43, 0x44};
-//     compare_bytes(expected, bytes);
-// }
-
-// TEST(TestSerialization, TestByteString2Byte)
-// {
-//     auto bytes = serialize_raw("ABCDABCDABCDABCDABCDABCDABCDABCDABCDABCDABCDABCDABCDABCDABCDABCD");
-//     std::print("{:#x}", std::to_integer<int>(bytes[1]));
-//     EXPECT_EQ(bytes[0], std::byte(88));
-// }
+TEST(TestSerialization, TestByteString1Byte)
+{
+    auto bytes = serialize("ABCD");
+    const std::vector<int> expected{0x64, 0x41, 0x42, 0x43, 0x44};
+    compare_bytes(expected, bytes);
+}
 
 TEST(TestArraySerialize, TestArray)
 {
@@ -154,14 +136,28 @@ TEST(TestArraySerialize, TestMixArray)
     compare_bytes(expected, bytes);
 }
 
-
-TEST(TestMapSerialize, TestMap) {
-    std::unordered_map<std::string, cvariant> data{
-        {"name", "John Doe"},
-        {"age", 25},
-        {"is_student", true}
-    };
+TEST(TestMapSerialize, TestMap)
+{
+    std::unordered_map<std::string, cvariant> data{{"1", "2"}};
     auto bytes = serialize(data);
-    std::vector<int> expected{0xA3, 0x44, 0x6E, 0x61, 0x6D, 0x65, 0x64, 0x4A, 0x6F, 0x68, 0x6E, 0x20, 0x44, 0x6F, 0x65, 0x01, 0x69, 0x73, 0x5F, 0x73, 0x74, 0x75, 0x64, 0x65, 0x6E, 0x74, 0xF5};
+    std::vector<int> expected{0xA1, 0x61, 0x31, 0x61, 0x32};
+    compare_bytes(expected, bytes);
+}
+
+TEST(TestMapSerialize, TestMixTypes)
+{
+    std::unordered_map<std::string, cvariant> data{
+        {"1", cvariant(std::vector<cvariant>{1, 2, 3})}};
+
+    auto bytes = serialize(data);
+    std::vector<int> expected{0xA1, 0x61, 0x31, 0x83, 0x01, 0x02, 0x03};
+
+    compare_bytes(expected, bytes);
+}
+
+TEST(TestFloatSerialize, TestSingleFloat)
+{
+    auto bytes = serialize(3.14159);
+    std::vector<int> expected{0xFB, 0x40, 0x09, 0x21, 0xF9, 0xF0, 0x1B, 0x86, 0x6E};
     compare_bytes(expected, bytes);
 }
