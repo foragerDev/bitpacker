@@ -22,8 +22,8 @@ namespace bitpacker
     template <typename T>
     std::optional<std::vector<T>> parse_array(std::vector<std::byte> &data)
     {
-        std::vector<T> result;
-        for (auto &c :)
+        // std::vector<T> result;
+        // for (auto &c :)
     };
 
     template <typename K, typename V>
