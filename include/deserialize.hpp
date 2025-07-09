@@ -11,18 +11,22 @@
 #include <unordered_map>
 #include <vector>
 
-
-namespace bitpacker {
+namespace bitpacker
+{
     std::optional<uint64_t> parse_unsigned_int(const std::vector<std::byte> &data);
 
     std::optional<int64_t> parse_int(const std::vector<std::byte> &data);
 
-    std::optional<std::string_view> parse_string(std::vector<std::byte> &data);
+    std::optional<std::string> parse_string(const std::vector<std::byte> &data);
 
-    template<typename T>
-    std::optional<std::vector<T> > parse_array(std::vector<std::byte> &data) { return {}; };
+    template <typename T>
+    std::optional<std::vector<T>> parse_array(std::vector<std::byte> &data)
+    {
+        std::vector<T> result;
+        for (auto &c :)
+    };
 
-    template<typename K, typename V>
-    std::optional<std::unordered_map<K, V> > parse_map(std::vector<std::byte> &data) { return {}; };
+    template <typename K, typename V>
+    std::optional<std::unordered_map<K, V>> parse_map(std::vector<std::byte> &data) { return {}; };
 }
-#endif //DESERIALIZE_H
+#endif // DESERIALIZE_H

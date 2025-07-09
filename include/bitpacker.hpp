@@ -12,16 +12,25 @@
 
 #include "cbor_variant.hpp"
 
-namespace bitpacker {
-    template<typename T>
-    std::vector<std::byte> encode(T value) {
+namespace bitpacker
+{
+    template <typename T>
+    std::vector<std::byte> encode(T value)
+    {
         return bitpacker::cvariant(value).serialize();
     }
 
-    // template<typename T>  // Return type
-    // T decode(std::vector<std::byte> &data) {
-    //     return bitpacker::cvariant(data).deserialize();
-    // }
+    // TODO: Add Error handling
+    template <typename T> // Return type
+    T decode(std::vector<std::byte> &data)
+    {
+        if (data.empty())
+        {
+            throw std::runtime_error("Data is empty!");
+        }
+        auto type = cvariant::from_bytes(data);
+        return *(type->get_type<T>());
+    }
 }
 
-#endif //BITPACKER_H
+#endif // BITPACKER_H

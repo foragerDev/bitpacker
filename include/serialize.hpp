@@ -17,7 +17,7 @@ namespace bitpacker
 
     class cvariant;
     using var_t =
-        std::variant<int, long, long long, std::string_view, std::vector<bitpacker::cvariant>>;
+        std::variant<uint64_t, int64_t, std::string, std::vector<bitpacker::cvariant>>;
     using return_type = std::vector<std::byte>;
 
     return_type serialize_numeric(MajorType data_type, std::integral auto integer)

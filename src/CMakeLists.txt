@@ -5,5 +5,6 @@ set(CXX_STANDARD 23)
 set(CXX_STANDARD_REQUIRED true)
 
 add_executable(usage_example
-        ../exampple/example.cpp)
+        ../example/example.cpp cbor_variant.cpp encode.cpp serialize.cpp deserialize.cpp)
+
 link_directories(include)
