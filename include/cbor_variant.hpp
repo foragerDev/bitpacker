@@ -5,12 +5,21 @@
 #include <unordered_map>
 #include <variant>
 #include <vector>
+#include <concepts>
 
 #include "deserialize.hpp"
 #include "serialize.hpp"
 
 namespace bitpacker
 {
+    template <typename T>
+    concept PackableContainer = std::ranges::range<std::remove_cvref_t<T>> &&
+                                requires(
+                                    std::remove_cvref_t<T> &c,
+                                    typename std::remove_cvref_t<T>::value_type const &v) {
+                                    c.emplace_back(v);
+                                };
+
     class cvariant : public var_t
     {
         using var_t::variant;
@@ -18,6 +27,12 @@ namespace bitpacker
     public:
         template <typename T>
         cvariant(T &&value) : var_t(std::forward<T>(value))
+        {
+        }
+
+        template <PackableContainer T>
+            requires std::constructible_from<var_t, std::decay_t<typename T::value_type>>
+        cvariant(T &&container) : var_t(std::vector<cvariant>(container.begin(), container.end()))
         {
         }
 

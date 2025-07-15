@@ -15,9 +15,9 @@
 namespace bitpacker
 {
     template <typename T>
-    std::vector<std::byte> encode(T value)
+    std::vector<std::byte> encode(T &&value)
     {
-        return bitpacker::cvariant(value).serialize();
+        return bitpacker::cvariant(std::forward<std::remove_reference_t<T>>(value)).serialize();
     }
 
     // TODO: Add Error handling

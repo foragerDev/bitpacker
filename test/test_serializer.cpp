@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+#include <numeric>
+
 #include "serialize.hpp"
 #include "cbor_variant.hpp"
 #include "deserialize.hpp"
@@ -125,6 +127,14 @@ TEST(TestArraySerialize, TestArrayOfArray)
     compare_bytes(expected, bytes);
 }
 
+
+TEST(TestArraySerialize, TestArrayOfLongerSize){
+    std::vector<int> sample(25);
+    std::iota(sample.begin(), sample.end(), 0);
+
+    // auto bytes = serialize(sample);
+
+}
 TEST(TestArraySerialize, TestMixArray)
 {
     std::vector<cvariant> data{
